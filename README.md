@@ -1,398 +1,344 @@
-NEH Hospital — Identity & Access Management Lab
-Enterprise IAM, Hybrid Identity, Zero Trust & Healthcare Security
-
-A hands-on Identity and Access Management (IAM) lab designed for a simulated 500-bed healthcare organization. The environment demonstrates enterprise identity management, role-based access control, privileged access management, hybrid identity, conditional access, security policy enforcement, and identity lifecycle automation.
+NEH Hospital
+Identity and Access Management Lab
+Full Technical Documentation
 
 Platform: Windows Server 2016 + Microsoft Entra ID P2
-Virtualization: VirtualBox
-Workstation: Windows 11
 Domain: NEH.local
-Compliance Alignment: HIPAA Security Rule | NIST SP 800-63 | Zero Trust
-
-Project Overview
-
-This project simulates the design and implementation of an enterprise IAM environment for NEH Hospital.
-
-The lab covers the identity lifecycle from account creation and provisioning through access control, authentication, privileged access, periodic access reviews, and account termination.
-
-Core Technologies
-Technology	Implementation
-Active Directory Domain Services	OU structure, users, groups, delegation
-Windows Server 2016	Domain Controller, DNS, file services
-Microsoft Entra ID P2	Cloud identity and access management
-Microsoft Entra Connect	Hybrid identity synchronization
-Conditional Access	MFA, risk-based controls, network restrictions
-Privileged Identity Management	Just-in-time privileged access
-Identity Protection	Risk-based identity security
-Access Reviews	Periodic access certification
-Group Policy	Security configuration and endpoint restrictions
-PowerShell	Identity lifecycle automation
-VirtualBox	Lab virtualization
-IAM Architecture
-                         ┌─────────────────────────┐
-                         │   Microsoft Entra ID     │
-                         │          P2             │
-                         │                         │
-                         │ Conditional Access      │
-                         │ PIM                     │
-                         │ Identity Protection     │
-                         │ Access Reviews          │
-                         └────────────┬────────────┘
-                                      │
-                              Entra Connect
-                                      │
-                                      ▼
-                         ┌─────────────────────────┐
-                         │    Windows Server 2016   │
-                         │         NEH01           │
-                         │                         │
-                         │ Active Directory        │
-                         │ DNS                     │
-                         │ File Shares             │
-                         │ Group Policy             │
-                         └────────────┬────────────┘
-                                      │
-                              `NEH.local`
-                                      │
-                 ┌────────────────────┼────────────────────┐
-                 │                    │                    │
-                 ▼                    ▼                    ▼
-          Clinical Users       Administrative        IT Users
-                                  Users
-                 │                    │                    │
-                 └────────────────────┼────────────────────┘
-                                      │
-                                      ▼
-                              Windows 11
-                              Workstation
-
-Active Directory Design
-Organizational Units
-
-The Active Directory environment uses a structured OU hierarchy to separate users by department and apply targeted Group Policy.
-
-NEH.local
-│
-├── NEH-Users
-│   ├── NEH-IT
-│   │   ├── NEH-IT-Support
-│   │   ├── NEH-IT-Admins
-│   │   ├── NEH-IT-Server-Admins
-│   │   └── NEH-IT-Network
-│   │
-│   ├── Clinical
-│   │   ├── Physicians
-│   │   ├── Nursing
-│   │   ├── Pharmacy
-│   │   └── Radiology
-│   │
-│   ├── Administrative
-│   │   ├── HR
-│   │   └── Billing
-│   │
-│   ├── Contractors
-│   └── Vendors
-│
-├── NEH-Workstation
-├── Disabled
-└── ServiceAccounts
-
-Design Principles
-OUs determine where accounts are stored and where GPOs apply.
-Security groups determine resource access.
-A dedicated Disabled OU provides a controlled location for terminated accounts.
-Workstations are separated from user accounts for computer-based policy targeting.
-Human accounts are organized under NEH-Users.
-Role-Based Access Control
-
-Security groups were designed around job responsibilities rather than individual users.
-
-IT
-Role	Security Group
-IT Administrators	GRP-IT-Admins
-Helpdesk	GRP-IT-Support
-Server Administrators	GRP-IT-Server-Admins
-Network Engineers	GRP-IT-Network
-Clinical
-Role	Security Group
-Physicians	GRP-Physicians
-Registered Nurses	GRP-Nursing-RN
-Charge Nurses	GRP-Nursing-Charge
-Pharmacists	GRP-Pharmacy-PharmD
-Pharmacy Technicians	GRP-Pharmacy-Tech
-Radiologists	GRP-Radiology-MD
-Radiology Technicians	GRP-Radiology-Tech
-Administrative
-Role	Security Group
-HR Management	GRP-HR-Manager
-HR Staff	GRP-HR-Staff
-Billing Management	GRP-Billing-Manager
-Billing Staff	GRP-Billing-Staff
-External Users
-
-Contractors and vendors were separated into dedicated security groups with restricted access and account expiration dates.
-
-Group Policy
-
-Department-specific GPOs were implemented to enforce security controls and least privilege.
-
-Password Policy
-
-The domain password policy includes:
-
-12-character minimum password length
-Password complexity enabled
-90-day maximum password age
-10-password history
-5-attempt account lockout threshold
-30-minute lockout duration
-Minimum password age of 1 day
-Endpoint Security
-
-Additional GPO controls include:
-
-Audit account management
-Audit logon events
-Audit directory service access
-HIPAA security warning banners
-Automatic screen locking
-USB storage restrictions
-Registry Editor restrictions
-Control Panel restrictions
-PowerShell/CMD restrictions for appropriate users
-Task Manager restrictions for vendor accounts
-Hybrid Identity
-
-Microsoft Entra Connect was used to synchronize on-premises Active Directory identities with Microsoft Entra ID.
-
-Synchronization
-Active Directory
-      │
-      │ Users
-      │ Groups
-      │ Attributes
-      │ Password Hashes
-      ▼
-Microsoft Entra Connect
-      │
-      ▼
-Microsoft Entra ID
-
-
-Password Hash Synchronization was used as the hybrid authentication method.
-
-The lab also includes a Windows 11 workstation configured for hybrid identity.
-
-Conditional Access
-
-Conditional Access policies were designed around Zero Trust principles.
-
-Implemented Policies
-Policy	Purpose
-NEH-MFA-All-Users	MFA for hospital users
-NEH-Block-Legacy-Auth	Prevent legacy authentication
-NEH-MFA-IT-Admins	Stronger controls for IT administrators
-NEH-Block-Outside-Network	Restrict external network access
-NEH-External-Restrictions	Additional controls for contractors/vendors
-NEH-User-Risk-Policy	Respond to high-risk users
-NEH-Sign-In-Risk-Policy	Respond to risky authentication attempts
-
-These policies demonstrate the Zero Trust concept of verify explicitly and continuously evaluate access conditions.
-
-Privileged Identity Management
-
-Microsoft Entra Privileged Identity Management (PIM) was configured to eliminate unnecessary standing administrative privileges.
-
-Administrative roles were configured as eligible rather than permanently assigned.
-
-Activation Process
-Administrator
-     │
-     ▼
-Open My Roles
-     │
-     ▼
-Activate Role
-     │
-     ▼
-Provide Business Justification
-     │
-     ▼
-Temporary Privileged Access
-     │
-     ▼
-Automatic Expiration
-
-
-This approach reduces the attack surface associated with permanently assigned privileged roles.
-
-Access Reviews
-
-Periodic access reviews were configured for sensitive security groups.
-
-Reviews include:
-
-Physicians
-Nursing
-IT Administrators
-HR Managers
-Billing Managers
-Clinical Contractors
-EHR Vendors
-Review Configuration
-Frequency: Quarterly
-Review duration: 14 days
-Reviewer: User's manager
-Automatic application of results: Enabled
-Non-response: Remove access
-Review lifecycle: Ongoing
-
-This provides a repeatable process for validating that users continue to require their assigned access.
-
-Identity Lifecycle Automation
-
-PowerShell automation was used to support identity lifecycle processes.
-
-Joiner
-
-New employee provisioning includes:
-
-Account creation
-OU placement
-Security group membership
-Department attributes
-Initial account configuration
-Mover
-
-Department changes can trigger:
-
-OU changes
-Group membership updates
-Removal of previous access
-Assignment of new role-based access
-Leaver
-
-Offboarding includes:
-
-Account disabling
-Access removal
-Group membership cleanup
-Account expiration
-Moving the account to the Disabled OU
-Shared Resources
-
-Department-specific network shares were configured with group-based permissions.
-
-Examples include:
-
-\\NEH01\NEH-IT-Support
-\\NEH01\NEH-IT-Admins
-\\NEH01\NEH-IT-Server-Admins
-\\NEH01\NEH-IT-Network
-\\NEH01\NEH-HR
-\\NEH01\NEH-Billing
-
-
-Access is assigned through security groups rather than individual user permissions.
-
-Security Testing & Findings
-Application Control Bypass
-
-During testing, a limitation was identified in the Windows application restriction configuration.
-
-Finding
-
-Blocked executables could potentially be launched indirectly through a batch file.
-
-Severity
-
-Medium
-
-Affected Policies
-Helpdesk
-Clinical
-Contractor
-Vendor
-Recommended Remediation
-
-Implement AppLocker script rules to restrict:
-
-*.bat
-*.cmd
-*.vbs
-*.ps1
-
-
-Security filtering can be used to exempt authorized IT administrators where scripting is required for legitimate administrative functions.
-
-Security Lesson
-
-The finding demonstrates the importance of validating security controls through hands-on testing. A policy that appears effective during normal use may still have alternate execution paths.
+Compliance: HIPAA | NIST SP 800-63 | Zero Trust
+Environment: VirtualBox | Windows Server 2016 | Windows 11
+ 
+Executive Summary
+This document describes the design, implementation, and configuration of a complete enterprise Identity and Access Management (IAM) environment built for NEH Hospital. The lab simulates a real-world healthcare IAM deployment aligned to HIPAA Security Rule requirements, NIST SP 800-63 identity standards, and Zero Trust architecture principles.
+
+The environment covers the full IAM lifecycle including identity provisioning, role-based access control, group policy enforcement, privileged access management, conditional access, and access certification reviews.
+
+Component	Technology Used
+On-Premises Directory	Windows Server 2016 Active Directory
+Cloud Identity	Microsoft Entra ID (Azure AD) P2
+Hybrid Sync	Microsoft Entra Connect
+Workstation	Windows 11 (VirtualBox VM)
+Policy Enforcement	Group Policy Objects (GPOs)
+Privileged Access	Privileged Identity Management (PIM)
+Access Control	Conditional Access Policies
+Risk Management	Identity Protection
+Access Certification	Entra ID Access Reviews
+Compliance Framework	HIPAA | NIST 800-63 | Zero Trust
+ 
+Lab Architecture
+Environment Overview
+Component	Details
+Server Hostname	NEH01
+Domain Name	NEH.local
+Server IP	192.168.1.x (static)
+Operating System	Windows Server 2016
+Workstation OS	Windows 11
+Network Type	VirtualBox Bridged Adapter
+Entra ID Tenant	*.onmicrosoft.com
+Entra ID License	P2 (PIM, Identity Protection, Access Reviews)
 
 Compliance Alignment
-HIPAA
+Standard	How Lab Addresses It
+HIPAA - Unique User ID	Every staff member has a unique AD account, no shared logins
+HIPAA - Minimum Necessary	RBAC via security groups, least privilege per role
+HIPAA - Audit Controls	Audit logging GPO on all OUs, Entra ID sign-in logs
+HIPAA - Automatic Logoff	Screensaver timeout GPOs on all workstations
+HIPAA - Access Termination	Disabled OU, account expiry for contractors/vendors
+NIST 800-63	12-character minimum password, MFA enforcement
+Zero Trust	PIM no standing access, Conditional Access always verify
+CIS Controls	GPO restrictions, USB blocking, application control
+ 
+Active Directory OU Structure
+Design Principles
+•	OUs organize where accounts live and where GPOs apply
+•	Security Groups control what resources users can access
+•	Disabled OU at top level catches terminated accounts from any department
+•	Workstations OU separate from user OUs for computer GPO targeting
+•	All human accounts live inside NEH-Users regardless of department
 
-The lab demonstrates controls supporting:
+Full OU Hierarchy
+NEH.local
+├── OU=NEH-Users
+│   ├── OU=NEH-IT
+│   │   ├── OU=NEH-IT-Support
+│   │   ├── OU=NEH-IT-Admins
+│   │   ├── OU=NEH-IT-Server-Admins
+│   │   └── OU=NEH-IT-Network
+│   ├── OU=Clinical
+│   │   ├── OU=Physicians
+│   │   ├── OU=Nursing
+│   │   ├── OU=Pharmacy
+│   │   └── OU=Radiology
+│   ├── OU=Administrative
+│   │   ├── OU=HR
+│   │   └── OU=Billing
+│   ├── OU=Contractors
+│   └── OU=Vendors
+├── OU=NEH-Workstation
+├── OU=Disabled
+└── OU=ServiceAccounts
+ 
+Users and Security Groups
+IT Department
+User	Title	Security Group
+Michael Torres	IT Manager	GRP-IT-Admins
+James Carter	IT Engineer	GRP-IT-Admins
+Rachel Gomez	IT Engineer	GRP-IT-Admins
+David Okonkwo	Helpdesk Technician	GRP-IT-Support
+Lisa Tran	Helpdesk Technician	GRP-IT-Support
+Kevin Patel	Helpdesk Technician	GRP-IT-Support
+Marcus Webb	Server Administrator	GRP-IT-Server-Admins
+Angela Brooks	Server Administrator	GRP-IT-Server-Admins
+Chris Nguyen	Network Engineer	GRP-IT-Network
+Sarah Mitchell	Network Engineer	GRP-IT-Network
 
-Unique user identification
-Least privilege
-Minimum necessary access
-Audit logging
-Automatic workstation locking
-Account termination procedures
-Periodic access certification
-NIST SP 800-63
+Clinical Department
+User	Title	Security Group
+William Hayes	Attending Physician	GRP-Physicians
+Amanda Rivera	Resident Physician	GRP-Physicians
+Robert Chen	Chief of Medicine	GRP-Physicians
+Patricia Williams	Registered Nurse	GRP-Nursing-RN
+Thomas Jackson	Registered Nurse	GRP-Nursing-RN
+Sandra Lee	Charge Nurse	GRP-Nursing-Charge
+Jennifer Kim	Pharmacist	GRP-Pharmacy-PharmD
+Daniel Park	Pharmacist	GRP-Pharmacy-PharmD
+Michelle Scott	Pharmacy Technician	GRP-Pharmacy-Tech
+Richard Morgan	Radiologist	GRP-Radiology-MD
+Elizabeth Turner	Radiologist	GRP-Radiology-MD
+Carlos Reyes	Radiology Technician	GRP-Radiology-Tech
 
-The environment incorporates:
+Administrative Department
+User	Title	Security Group
+Angela Brooks	HR Manager	GRP-HR-Manager
+Nicole Washington	HR Coordinator	GRP-HR-Staff
+Steven Hall	Recruiter	GRP-HR-Staff
+Kevin Patel	Billing Manager	GRP-Billing-Manager
+Diana Foster	Medical Coder	GRP-Billing-Staff
+Raymond Price	Billing Specialist	GRP-Billing-Staff
 
-Strong authentication
-MFA
-Password controls
-Identity lifecycle management
-Zero Trust
+External Accounts
+User	Title	Security Group
+John Smith	Travel Nurse	GRP-Contractors-Clinical
+Maria Santos	Locum Physician	GRP-Contractors-Clinical
+Brian Wallace	Temp Medical Coder	GRP-Contractors-Admin
+TechCorp Vendor1	EHR Support Tech	GRP-Vendors-EHR
+MedSupply Vendor2	Medical Equipment Rep	GRP-Vendors-Equipment
+NetVendor Vendor3	Network Vendor Rep	GRP-Vendors-Network
 
-The architecture incorporates:
+All contractor accounts expire 09/01/2026. All vendor accounts expire 08/25/2026. Account expiry is set at the AD account level aligned to HIPAA access termination requirements.
+ 
+Group Policy Objects (GPOs)
+GPO Stack Overview
+GPO Name	Linked To
+NEH-Password-Policy	Domain Root (NEH.local)
+NEH-IT-Baseline	OU=NEH-IT
+NEH-IT-Helpdesk-Policy	OU=NEH-IT-Support
+NEH-IT-Admins-Policy	OU=NEH-IT-Admins
+NEH-IT-Server-Policy	OU=NEH-IT-Server-Admins
+NEH-IT-Network-Policy	OU=NEH-IT-Network
+NEH-Clinical-Baseline	OU=Clinical
+NEH-Physicians-Policy	OU=Physicians
+NEH-Nursing-Policy	OU=Nursing
+NEH-Pharmacy-Policy	OU=Pharmacy
+NEH-Radiology-Policy	OU=Radiology
+NEH-Administrative-Baseline	OU=Administrative
+NEH-HR-Policy	OU=HR
+NEH-Billing-Policy	OU=Billing
+NEH-Contractors-Policy	OU=Contractors
+NEH-Vendors-Policy	OU=Vendors
 
-Explicit verification
-MFA
-Risk-based authentication
-Least privilege
-Just-in-time privileged access
-Continuous access evaluation concepts
-Portfolio Highlights
+Password Policy — NEH-Password-Policy
+Linked at domain root. Password policies only apply when linked at this level.
 
-This project demonstrates hands-on experience with:
+Setting	Value	HIPAA Rationale
+Minimum password length	12 characters	NIST 800-63 requirement
+Password complexity	Enabled	Reduces brute force risk
+Maximum password age	90 days	Regular rotation reduces breach risk
+Minimum password age	1 day	Prevents immediate reuse
+Password history	10 passwords	Prevents cycling back to old passwords
+Account lockout threshold	5 attempts	Prevents brute force attacks
+Account lockout duration	30 minutes	Reduces attack window
+Reset lockout counter	30 minutes	Standard security practice
 
-Active Directory administration
-Windows Server administration
-Microsoft Entra ID
-Hybrid identity
-Conditional Access
-Privileged Identity Management
-Identity Protection
+IT Baseline — NEH-IT-Baseline
+Setting	Purpose
+Audit account management — Success/Failure	Logs all account changes
+Audit logon events — Success/Failure	Logs all login attempts
+Audit directory service access — Success/Failure	Logs AD object access
+HIPAA logon warning message	Legal notice before login
+
+Helpdesk Policy — NEH-IT-Helpdesk-Policy
+Setting	Purpose
+Block PowerShell and PowerShell ISE	Helpdesk has no scripting need
+Block Registry Editor	Prevent system tampering
+Block Control Panel	Prevent system configuration changes
+Screensaver timeout — 15 minutes	HIPAA automatic logoff requirement
+
+Clinical Baseline — NEH-Clinical-Baseline
+Setting	Purpose
+HIPAA clinical logon warning message	Legal notice for PHI systems
+Block USB drives	Prevent PHI data exfiltration
+Block Registry Editor	Prevent system tampering
+Audit logon events — Success/Failure	HIPAA audit control requirement
+Screensaver timeout — 10 minutes	HIPAA automatic logoff requirement
+
+External Policy — NEH-Contractors-Policy and NEH-Vendors-Policy
+Setting	Purpose
+External staff logon warning message	Legal notice for external access
+Block PowerShell and CMD	No scripting access for external staff
+Block Control Panel	No system configuration access
+Block Registry Editor	No system tampering
+Block USB drives	No data removal from hospital network
+Remove Run menu	Close additional launch vectors
+Screensaver — 5 min (contractors) / 3 min (vendors)	Stricter timeout for external accounts
+Block Task Manager (vendors only)	Maximum restriction for vendor accounts
+ 
+Active Directory Delegation
+Overview
+Delegation grants security groups specific permissions over AD objects without requiring Domain Admin rights. This aligns with HIPAA minimum necessary access — each group only gets what they need to perform their job function.
+
+Security Group	Delegated Permissions
+GRP-IT-Support	Reset user passwords, force password change at next logon
+GRP-IT-Admins	Create/delete/manage users, reset passwords, read all user info, manage groups
+GRP-HR-Manager	Read all user information
+GRP-HR-Staff	Read all user information
+GRP-Billing-Manager	Read all user information
+GRP-Billing-Staff	Read all user information
+ 
+Shared Drive Configuration
+Drive Mapping Overview
+Shared drives are automatically mapped to users via Group Policy Drive Maps. Users see their department drive in File Explorer when they log in — no manual path entry required.
+
+Share Path	Access Group	Permission
+\\NEH01\NEH-IT-Support	GRP-IT-Support	Read
+\\NEH01\NEH-IT-Admins	GRP-IT-Admins	Full Control
+\\NEH01\NEH-IT-Server-Admins	GRP-IT-Server-Admins	Full Control
+\\NEH01\NEH-IT-Network	GRP-IT-Network	Full Control
+\\NEH01\NEH-HR	GRP-HR-Manager, GRP-HR-Staff	Full Control / Read
+\\NEH01\NEH-Billing	GRP-Billing-Manager, GRP-Billing-Staff	Full Control / Read
+
+Helpdesk has Read-only access to IT-Support share — they can view procedures and documentation but cannot modify files. This aligns with least privilege principle.
+ 
+Hybrid Identity — Entra Connect
+Overview
+Microsoft Entra Connect synchronizes on-premises Active Directory objects to Entra ID (Azure AD). This creates a hybrid identity environment where users have one identity that works for both on-prem resources and cloud applications.
+
+Sync Direction	Details
+On-prem to Cloud	Users, Groups synced from NEH.local to Entra ID
+Sync Method	Password Hash Synchronization
+Sync Frequency	Every 30 minutes (default)
+Hybrid Join	Windows 11 workstation joined to both NEH.local and Entra ID
+
+What Gets Synced
+•	All user accounts from NEH-Users OU
+•	All security groups and their memberships
+•	User attributes — name, title, department, email
+•	Account status — enabled/disabled
+•	Password hashes for cloud authentication
+ 
+Conditional Access Policies
+Overview
+Conditional Access enforces Zero Trust principles by evaluating every sign-in against defined conditions before granting access. All policies are configured in Microsoft Entra ID and apply to cloud application access.
+
+Policy Name	Purpose
+NEH-MFA-All-Users	Require MFA for all hospital staff on all cloud apps
+NEH-Block-Legacy-Auth	Block legacy authentication protocols that bypass MFA
+NEH-MFA-IT-Admins	Require MFA + 4-hour session limit for IT Admins
+NEH-Block-Outside-Network	Block access from outside hospital network IP range
+NEH-External-Restrictions	MFA + 1-hour session for contractors and vendors
+NEH-User-Risk-Policy	High risk users must MFA and change password
+NEH-Sign-In-Risk-Policy	Medium/High risk sign-ins require MFA
+
+Policy Details
+Policy	Conditions	Controls
+NEH-MFA-All-Users	All users, all cloud apps	Require MFA
+NEH-Block-Legacy-Auth	All users, Exchange ActiveSync + Other clients	Block access
+NEH-MFA-IT-Admins	GRP-IT-Admins, all cloud apps	MFA + 4hr sign-in frequency
+NEH-Block-Outside-Network	All users, outside 192.168.1.0/24	Block access
+NEH-External-Restrictions	Contractor/Vendor groups, medium/high risk	MFA + 1hr sign-in frequency
+NEH-User-Risk-Policy	All users, user risk = High	MFA + password change required
+NEH-Sign-In-Risk-Policy	All users, sign-in risk = Medium/High	MFA required
+ 
+Privileged Identity Management (PIM)
+Overview
+PIM eliminates standing privileged access by making admin roles eligible rather than permanently assigned. IT Admins must request and justify elevated access which is automatically revoked after a set time period. This directly addresses the HIPAA requirement for minimum necessary access on privileged accounts.
+
+Eligible Role Assignments
+User	Role	Assignment Type
+Michael Torres	User Administrator	Eligible
+Michael Torres	Global Reader	Eligible
+James Carter	User Administrator	Eligible
+Rachel Gomez	User Administrator	Eligible
+
+How PIM Works in This Environment
+•	No IT Admin has permanent Global Admin or User Admin rights
+•	When elevated access is needed the user activates their eligible role in PIM
+•	Activation requires a written business justification
+•	Access is granted for a limited time period then automatically removed
+•	All activations are logged for HIPAA audit purposes
+
+PIM activation workflow: User opens Entra ID portal → My roles → Activate → Enter justification → Access granted for limited time → Auto-removed on expiry
+ 
 Access Reviews
-Group Policy
-RBAC
-PowerShell automation
-Identity lifecycle management
-Security testing
-Healthcare security concepts
-Zero Trust architecture
-Repository Structure
-NEH-Hospital-IAM-Lab/
-│
-├── README.md
-├── docs/
-├── architecture/
-├── active-directory/
-├── group-policy/
-├── entra-id/
-├── powershell/
-├── screenshots/
-└── security-findings/
+Overview
+Access Reviews automate the HIPAA requirement for periodic access certification. Every 90 days managers are prompted to review and confirm who still needs access to each security group. Anyone not confirmed has their access automatically removed.
 
-Disclaimer
+Configured Access Reviews
+Review Name	Group Reviewed
+NEH-Physicians-Quarterly-Access-Review	GRP-Physicians
+NEH-Nursing-RN-Quarterly-Access-Review	GRP-Nursing-RN
+NEH-Nursing-Charge-Quarterly-Access-Review	GRP-Nursing-Charge
+NEH-IT-Admins-Quarterly-Access-Review	GRP-IT-Admins
+NEH-HR-Manager-Quarterly-Access-Review	GRP-HR-Manager
+NEH-Billing-Manager-Quarterly-Access-Review	GRP-Billing-Manager
+NEH-Contractors-Clinical-Quarterly-Access-Review	GRP-Contractors-Clinical
+NEH-Vendors-EHR-Quarterly-Access-Review	GRP-Vendors-EHR
 
-This project is a controlled educational laboratory environment.
+Review Settings
+Setting	Value
+Recurrence	Quarterly (every 90 days)
+Duration	14 days for reviewers to respond
+Reviewer	Manager of each user
+Auto-apply results	Enabled
+If reviewer does not respond	Remove access
+End date	Never (ongoing)
 
-All organizations, identities, credentials, network addresses, and other infrastructure details are simulated and are not intended to represent a real healthcare organization's production environment.
+Quarterly access reviews directly satisfy HIPAA Security Rule 164.308(a)(3) — Workforce Authorization and Supervision — by providing documented evidence that access is regularly reviewed and certified.
+ 
+Security Findings and Remediation
+Finding 1 — Application Block Bypass via Batch Files
+During lab testing it was discovered that the Don't run specified Windows applications GPO setting can be bypassed by wrapping blocked executables in a .bat batch file. The policy blocks executables by name but does not prevent indirect execution via scripting.
+
+Detail	Description
+Finding	PowerShell and CMD blocked by GPO name can be launched via .bat file
+Severity	Medium
+Affected Policies	NEH-IT-Helpdesk-Policy, NEH-Clinical-Baseline, NEH-Contractors-Policy, NEH-Vendors-Policy
+Remediation	Implement AppLocker Script Rules to block .bat, .cmd, .vbs, .ps1 execution
+Status	Identified — remediation pending
+
+Remediation: Add AppLocker Script Rules via NEH-AppLocker-Policy linked to NEH-Users OU. Block *.bat, *.cmd, *.vbs, *.ps1 for all non-IT users. Exempt GRP-IT-Admins, GRP-IT-Server-Admins, GRP-IT-Network via security filtering.
+ 
+Portfolio and Resume Talking Points
+How to Describe This Lab
+•	Designed and implemented a complete enterprise IAM environment for a simulated 500-bed hospital aligned to HIPAA Security Rule requirements
+•	Built Active Directory OU structure and RBAC group model covering 5 departments and 30+ user accounts across clinical, administrative, and external staff personas
+•	Configured 16 Group Policy Objects enforcing least privilege, application control, USB blocking, audit logging, and HIPAA logon warnings across all hospital departments
+•	Implemented hybrid identity architecture using Microsoft Entra Connect to sync on-premises AD to Entra ID, enabling single identity for both on-prem and cloud resources
+•	Configured 7 Conditional Access policies enforcing MFA, blocking legacy authentication, restricting access by network location, and applying risk-based access controls
+•	Deployed Privileged Identity Management eliminating standing admin access — all privileged roles are eligible only and require time-limited activation with business justification
+•	Implemented 8 quarterly Access Reviews automating HIPAA access certification for clinical, administrative, and privileged groups
+•	Identified and documented application control bypass vulnerability via batch files during testing — remediation plan documented
+•	Automated user provisioning using PowerShell scripts for joiner, mover, and leaver identity lifecycle processes
+
+Key Technologies Demonstrated
+Technology	What You Did With It
+Active Directory	OU design, user/group management, GPO configuration, delegation
+Windows Server 2016	DC promotion, AD DS, DNS, file shares, drive mapping
+Microsoft Entra ID P2	Conditional Access, PIM, Identity Protection, Access Reviews
+Entra Connect	Hybrid identity sync, password hash synchronization
+PowerShell	User provisioning, group management, AD automation
+Group Policy	Application control, USB blocking, audit logging, drive mapping
+RBAC	Security group design, least privilege enforcement, delegation
+Zero Trust	No standing access, always verify, assume breach monitoring
+HIPAA	Minimum necessary access, audit controls, access certification
+
+Built as part of NEH Hospital IAM Lab — Windows Server 2016 + Microsoft Entra ID P2
